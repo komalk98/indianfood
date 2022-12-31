@@ -1,0 +1,51 @@
+#Prerequisite for the fresh installation of Bahmni
+yum install -y https://kojipkgs.fedoraproject.org//packages/zlib/1.2.11/19.fc30/x86_64/zlib-1.2.11-19.fc30.x86_64.rpm
+yum install -y epel-release
+pip install --upgrade pip
+pip install babel==v1.0 python-stdnum urllib3==1.21.1 idna==2.5 chardet==3.0.2 certifi==2017.4.17 qrcode pyserial pypdf python-chart psycogreen passlib ofxparse requests
+ 
+# Install the bahmni command line program (Choose the version you want)
+yum install -y https://repo.mybahmni.org/releases/bahmni-installer-0.93-219.noarch.rpm
+ 
+# download the postgres repo rpm. This is because wget fails to verify the keys.
+# If you prefer the default download by wget, then you have to install the ca-certificates module
+# and configure wget. Alternatively you can use curl like below.
+# for more info check: https://talk.openmrs.org/t/bahmni-0-92-install-on-centos-7-6-minimal-fails/25416/48
+ 
+# download postgres rpm
+rm -f /opt/pgdg-redhat-repo-*
+cd /opt && wget https://repo.mybahmni.org/releases/pgdg-redhat-repo-42.0-23.noarch.rpm
+ 
+# Confirm that the bahmni command is correctly installed (you should see a help message for the command)
+bahmni --help
+  
+# Now setup a configuration file for bahmni command in /etc/bahmni-installer.
+# Note, before running the below command check whether the /etc/bahmni-installer/setup.yml already exists or not.
+curl -L https://tinyurl.com/yyoj98df >> /etc/bahmni-installer/setup.yml
+ 
+# Edit the setup.yml file and add the Bahmni Repo URL
+vi /etc/bahmni-installer/setup.yml
+bahmni_repo_url: https://repo.mybahmni.org/releases/
+  
+# Confirm the contents of the file. It should look like this file: (https://goo.gl/R8ekg5)
+cat /etc/bahmni-installer/setup.yml
+ 
+# The above setup.yml, has a timezone entry. You can change it to suit your timezone if you like. For valid options
+# please read this document: https://bahmni.atlassian.net/wiki/display/BAH/List+Of+Configurable+Installation+Variables
+ 
+# Optionally set the inventory file name to local in BAHMNI_INVENTORY environment variable. This way you won't need to use the '-i local' switch every time you use the 'bahmni' command.
+# You can also configure custom inventory file instead of local.
+echo "export BAHMNI_INVENTORY=local" >> ~/.bashrc
+source ~/.bashrc
+ 
+# configure components you require. Edit the inventory file (or your custom inventory file)
+vi /etc/bahmni-installer/local
+ 
+  
+# Now fire the installer. If you have exported the variable as above you can ignore the "-i local" option. 
+bahmni -i local install 
+ 
+  
+# The installation should be done in about 15 - 30 minutes depending on your internet speed.
+# Verify installed components using the command:
+yum list installed | grep bahmni
